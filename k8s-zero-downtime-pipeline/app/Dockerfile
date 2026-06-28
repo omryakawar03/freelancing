@@ -1,13 +1,19 @@
-FROM python:3.12-slim AS builder
+FROM python:3.12.3-slim-bookworm AS builder
 WORKDIR /app
-COPY app/requirements.txt .
-RUN pip install --no-cache-dir --target=/install -r requirements.txt
+COPY requirements.txt .
+RUN apt-get update \
+    && apt-get upgrade -y --no-install-recommends \
+    && pip install --no-cache-dir --target=/install -r requirements.txt \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
 
-FROM python:3.12-slim
+FROM python:3.12.3-slim-bookworm
 WORKDIR /app
 COPY --from=builder /install /usr/local/lib/python3.12/site-packages
-COPY app/ .
-RUN useradd -m appuser
+COPY . .
+RUN groupadd --system appgroup \
+    && useradd --system --gid appgroup --create-home --home-dir /home/appuser appuser \
+    && chown -R appuser:appgroup /app
 USER appuser
 EXPOSE 5000
 CMD ["python", "app.py"]
