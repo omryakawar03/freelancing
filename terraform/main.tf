@@ -5,13 +5,16 @@ provider "aws" {
 data "aws_vpc" "default" {
   default = true
 }
+data "aws_subnet_ids" "default" {
+  vpc_id = data.aws_vpc.default.id
+}
 
 module "eks" {
   source  = "terraform-aws-modules/eks/aws"
   version = "~> 20.0"
   cluster_name    = "zero-downtime-cluster"
   vpc_id     = data.aws_vpc.default.id
- 
+  subnet_ids = data.aws_subnet_ids.default.ids
   eks_managed_node_groups = {
     default = {
       min_size       = 1
