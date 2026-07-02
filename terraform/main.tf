@@ -11,8 +11,7 @@ module "eks" {
   version = "~> 20.0"
   cluster_name    = "zero-downtime-cluster"
   vpc_id     = data.aws_vpc.default.id
-  subnet_ids = data.aws_subnet.private_subnets
-
+ 
   eks_managed_node_groups = {
     default = {
       min_size       = 1
